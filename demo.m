@@ -18,34 +18,37 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Create some temporary simulated data
 
-n_ori   = 70;                                                              % number of discrete stimuli
-n_trial = 50;                                                              % number of trials for each stimuli
+addpath code_flexibleModulatedPoisson/  % add path with code
+
+n_ori   = 70;  % number of discrete stimuli
+n_trial = 50;  % number of repeated presentations for each stimulus
 
 stims = linspace(0,10,n_ori); % stimuli
 
 % Set nonlinearity and tuning curve
-p = 2;                                                                     % Set exponent of the nonlinearity
+p = 2;   % Set exponent of the nonlinearity
 if p == 1
-    signse = 7;                                                            % Set the noise standard deviation
-    ftune = sin((2*pi/10)*stims)*50+40;                                    % Generate the tuning curve to test
+    signse = 7; % Set the noise standard deviation
+    ftune = sin((2*pi/10)*stims)*50+40; % Generate the tuning curve to test
 elseif p == 2
-    signse = .66;                                                          % Set noise standard deviation
-    ftune = sin((2*pi/10)*stims)*3+3;                                      % Generate the tuning curve to test
+    signse = .66; % Set noise standard deviation
+    ftune = sin((2*pi/10)*stims)*3+3; % Generate the tuning curve to test
 end
-g = @(x)softrectpow(x,p);                                                  % Run data through the nonlinearity
+g = @(x)softrectpow(x,p); % Run data through the nonlinearity
 
 Rtrain = poissrnd(g(repmat(ftune,n_trial,1)+randn(n_trial,n_ori)*signse)); % Generate training data
 
-% Plot empirical tuning curve from training data
+%  ===== Plot empirical tuning curve from training data =============
 subplot(211); 
-plot(stims,ftune);
-title('true mus');
+plot(stims,g(ftune));
+title('noiseless tuning curve g(f(x))');
+xlabel('stimulus x'); ylabel('firing rate (sp/s)');
 
 subplot(212);
 plot(stims, Rtrain, 'ko'); hold on;
 h = plot(stims, mean(Rtrain), stims, var(Rtrain), 'r--'); hold off;
-legend(h,'mean', 'var');
-xlabel('x');
+legend(h,'mean', 'variance'); 
+xlabel('stimulus x'); ylabel('spike count');
 title('training data');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,13 +68,14 @@ prshat_srp = fminunc(negLsrp,prs0,opts);                                   % Run
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Make fig
 
-mu_hat_exp  = prshat_exp(1:end-1);                                         % Extract optimized mean parameter (exponential)
-mu_hat_sr   = prshat_sr(1:end-1);                                          % Extract optimized mean parameter (soft-rectification)
-mu_hat_srp  = prshat_srp(1:end-2);                                         % Extract optimized mean parameter (power soft-rectification)
-sig_hat_exp = exp(prshat_exp(end));                                        % Extract optimized variance parameter (exponential)
-sig_hat_sr  = exp(prshat_sr(end));                                         % Extract optimized variance parameter (soft-rectification)
-sig_hat_srp = exp(prshat_srp(end-1));                                      % Extract optimized variance parameter (power soft-rectification)
-p_hat_srp   = exp(prshat_srp(end));                                        % Extract optimized variance parameter (power soft-rectification)
+mu_hat_exp  = prshat_exp(1:end-1);    % Extract optimized mean parameter (exponential)
+mu_hat_sr   = prshat_sr(1:end-1);     % Extract optimized mean parameter (soft-rectification)
+mu_hat_srp  = prshat_srp(1:end-2);    % Extract optimized mean parameter (power soft-rectification)
+sig_hat_exp = exp(prshat_exp(end));   % Extract optimized variance parameter (exponential)
+sig_hat_sr  = exp(prshat_sr(end));    % Extract optimized variance parameter (soft-rectification)
+sig_hat_srp = exp(prshat_srp(end-1)); % Extract optimized variance parameter (power soft-rectification)
+p_hat_srp   = exp(prshat_srp(end));   % Extract optimized variance parameter (power soft-rectification)
+
 clf;
 plot(stims,ftune,'b',stims,mu_hat_exp,'r',stims,mu_hat_sr,'g',stims,mu_hat_srp,'k','linewidth', 2);
 legend('true', 'exp', 'soft-rect','soft-rect-p');
@@ -79,5 +83,3 @@ set(gca,'tickdir', 'out'); box off;
 title(sprintf('(sig=%.2f,sig_{exp}=%.2f,sig_{sr}=%.2f,sig_{srp}=%.2f,p_{srp}=%1.1f)',signse,sig_hat_exp,sig_hat_sr,sig_hat_srp,p_hat_srp));
 xlabel('x'); ylabel('mu');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
