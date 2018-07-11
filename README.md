@@ -10,7 +10,6 @@ of the flexible over-dispersed Poisson model in
 approach to partitioning neural variability" published 
 in Neural Computation, 2018.
 
-
 The main file to use in this repository is 
 
      negLfun_latentPoiss.m
@@ -21,9 +20,8 @@ returns the negative log-likelihood value for that data.
 The intended use is to use this function in conjunction
 with fmincon.m or a similar optimization function in 
 order to optimize the negative log-likelihood with 
-respect to the parameter set. 
+respect to the parameter set. An example on the appropriate
+use of this function is provided in the file "demo.m"
 
 
-----------------------------
-EOF
 ----------------------------
