@@ -25,7 +25,7 @@ function negL = negLfun_latentPoiss(prs,loglifun,Rtrain)
 
 % extract params
 mus      = prs(1:nstim)';                                                  % mean params
-otherprs = vec(exp(prs(nstim+1:end))).';                                   % exponentiate other params so they stay positive
+otherprs = exp(prs(nstim+1:end)).';                                   % exponentiate other params so they stay positive
 negLvals = loglifun(Rtrain,repmat(mus,nsamps,1),otherprs);                 % Compute neglogli for each response
 negL     = -sum(negLvals(:));                                              % Sum the values for the total log-likelihood value
 
